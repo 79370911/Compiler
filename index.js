@@ -87,7 +87,7 @@ function subsetContruction(nfaTrans) {
     while (true) {
         // Get all unmarked state of DFA
         var difference = differenceSet(dfaStates, markedDfaStates)
-        
+
         if (difference.size > 0) {
             // WTF??? every item in entries() has the same key and value. R U kidding me?
             T = difference.entries().next().value[0]
@@ -126,6 +126,70 @@ function subsetContruction(nfaTrans) {
     return dfaTrans
 }
 
+function elementExists(set, element) {
+    set.forEach(x => {
+        var result = equalsSet(x, element)
+        console.log(result)
+        if (result) {
+            return true
+        }
+    })
+    return false
+}
+
+function getAllStates(transitionTable) {
+    var result = new Set()
+    transitionTable.forEach(function (value, key, map) {
+        result.add(key)
+    })
+    return result
+}
+
+function isAcceptState(nfaTrans, state) {
+
+}
+
+function getValueBySetKey(map, key) {
+    var result = undefined
+    map.forEach(function(v, k, m) {
+        if (equalsSet(k, key)) {
+            result = v            
+        }
+    })
+    return result
+}
+
+function visualize(transitionTable) {
+    // Get all state of DFA
+    states = getAllStates(transitionTable)
+
+    // Assign label for every state
+    var labels = new Map()
+    var labelCharCode = "A".charCodeAt()
+    states.forEach(x => {
+        labels.set(x, String.fromCharCode(labelCharCode))
+        labelCharCode += 1
+    })
+    
+    // Generate dot script
+    var dotScript = ""
+    dotScript += "digraph dfa {\n"
+    dotScript += "    rankdir=LR;\n"
+    labels.forEach(function(value, key, map) {
+        dotScript += "    node [shape = circle, label = \"" + value 
+            // + " = {" + [...key].join(", ") + "}"
+            + "\"]; " + value + ";\n"
+    })
+    dfaTrans.forEach(function(value, key, map) {
+        Object.keys(value).forEach(y => {
+            dotScript += "    " + getValueBySetKey(labels, key) + " -> " + getValueBySetKey(labels, value[y]) + " [ label = \"" + y + "\" ];\n"
+        })
+    })
+    dotScript += "}\n"
+
+    return dotScript
+}
+
 
 
 function main() {
@@ -134,7 +198,9 @@ function main() {
 
     // Convert NFA to DFA
     dfaTrans = subsetContruction(NTrans)
-    console.log(dfaTrans)
+
+    // Visualize tranition table
+    var dotScript = visualize(dfaTrans)
 
     // Read code
     // fs.readFile('program.c', 'utf8', function(err, contents) {

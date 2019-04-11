@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/WangYihang/lexer/issues"
   },
-  "homepage": "https://github.com/WangYihang/lexer#readme"
+  "homepage": "https://github.com/WangYihang/lexer#readme",
+  "dependencies": {
+    "graphviz": "0.0.9"
+  }
 }
