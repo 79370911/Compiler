@@ -6,7 +6,8 @@ function getInputAlphabet(nfaTrans) {
         Object.keys(nfaTrans[key]).forEach(c => {
             // Cause epsilon is not a type of input
             // So there is no need to add it to alphabet
-            if (c != "") {
+            // c.length == 1 to distinct ACCEPT and input char
+            if (c != "" && c.length == 1) {
                 result.add(c)
             }
         })
@@ -77,6 +78,9 @@ function subsetContruction(nfaTrans) {
     var dfaStates = new Set()
     var markedDfaStates = new Set()
     var dfaTrans = new Map();
+    // Parse accept states of NFA transition table
+    var nfaAcceptStates = getAcceptStates(nfaTrans)
+    console.log(nfaAcceptStates)
 
     // Get input alphabet
     var inputAlphabet = getInputAlphabet(nfaTrans)
@@ -115,6 +119,22 @@ function subsetContruction(nfaTrans) {
 
                 transition = dfaTrans.get(T)
                 transition[a] = U
+                // Mark accept states of DFA transition table
+                T.forEach(nfaState => {
+                    nfaAcceptStates.forEach(function(v, k, m) {
+                        // console.log("nfaAcceptState: " + k)
+                        // console.log("nfaState: " + nfaState)
+                        if (nfaState == k) {
+                            // console.log("T should be an accept state")
+                            // console.log(T)
+                            // console.log(v)
+                            transition["ACCEPT"] = v
+                        }
+                    })
+                })
+                
+                // console.log(transition)
+
                 dfaTrans.set(T, transition)
             })
 
@@ -146,14 +166,18 @@ function getAllStates(transitionTable) {
 }
 
 function isAcceptState(nfaTrans, state) {
-
+    // TODO
+    return true
 }
 
 function getValueBySetKey(map, key) {
     var result = undefined
     map.forEach(function(v, k, m) {
-        if (equalsSet(k, key)) {
-            result = v            
+        // Accept states
+        if (Object.prototype.toString.apply(key) == "[object Set]") {
+            if (equalsSet(k, key)) {
+                result = v            
+            }   
         }
     })
     return result
@@ -191,23 +215,67 @@ function visualize(transitionTable) {
 }
 
 
+function DFA(dfaTrans, data) {
+    // Initial state
+    var state = dfaTrans.keys().next().value
+    var i = 0
+    while (true) {
+        var input = data[i]
+        s = getValueBySetKey(dfaTrans, state)[input]
+
+        if (s != undefined) {
+            state = s
+            // Accept state
+            if (isAcceptState(s)) {
+                // TODO : when to break
+                break
+            }
+        } else {
+            console.log(Object.keys(dfaTrans.get(state)) + " expected, got: " + input)
+            break
+        }
+    }
+    if (i == data.length) {
+        console.log("Succeed")
+    }
+}
+
+function getAcceptStates(nfaTrans) {
+    var result = new Map()
+    Object.keys(nfaTrans).forEach(key => {
+        Object.keys(nfaTrans[key]).forEach(c => {
+            // Cause epsilon is not a type of input
+            // So there is no need to add it to alphabet
+            // c.length == 1 to distinct ACCEPT and input char
+            if (c == "ACCEPT") {
+                result.set(parseInt(key, 10), nfaTrans[key][c])
+            }
+        })
+    });
+    return result
+}
+
+
 
 function main() {
     // Read NFA
-    var NTrans = require('./nfa.json')
+    var nfaTrans = require('./nfa.json')
+    console.log(nfaTrans)
 
     // Convert NFA to DFA
-    dfaTrans = subsetContruction(NTrans)
+    dfaTrans = subsetContruction(nfaTrans)
+    console.log(dfaTrans)
 
     // Visualize tranition table
     var dotScript = visualize(dfaTrans)
 
     // Read code
-    // fs.readFile('program.c', 'utf8', function(err, contents) {
-    //     console.log(contents);
-    // });
+    fs.readFile('program.c', 'utf8', function(err, data) {
+        console.log(data);
+        // Parse code
+        DFA(dfaTrans, data)
+    });
 
-    // Parse code
 }
 
 main()
