@@ -1,0 +1,150 @@
+{
+    "0":{
+        "edges":{
+            "+":["1"],
+            "-":["4"],
+            "*":["7"],
+            "/":["9"],
+            "&":["11"],
+            "|":["13"],
+            ">":["15"],
+            "<":["17"],
+            "!":["19"],
+            "=":["21"]
+        }
+    },
+    "1":{
+        "edges":{
+            "+":["2"],
+            "=":["3"]
+        },
+        "accept":"numeric opreater"
+    },
+    "2":{
+        "edges":{
+
+        },
+        "accept":"numeric opeater"
+    },
+    "3":{
+        "edges":{
+
+        },
+        "accept":"assignment"
+    },
+    "4":{
+        "edges":{
+            "-":["5"],
+            "=":["6"]
+        },
+        "accept":"numeric opeater"
+    },
+    "5":{
+        "edges":{
+
+        },
+        "accept":"numeric opeater"
+    },
+    "6":{
+        "edges":{
+            
+        },
+        "accept":"assignment"
+    },
+    "7":{
+        "edges":{
+            "=":["8"]
+        },
+        "accept":"numeric opeater"
+    },
+    "8":{
+        "edges":{
+
+        },
+        "accept":"assignment"
+    },
+    "9":{
+        "edges":{
+            "=":["10"]
+        },
+        "accept":"assignment"
+    },
+    "10":{
+        "edges":{
+
+        },
+        "accept":"assignment"
+    },
+    "11":{
+        "edges":{
+            "&":["12"]
+        },
+        "accept":"bit opeater"
+    },
+    "12":{
+        "edges":{
+            
+        },
+        "accept":"logical opeater"
+    },
+    "13":{
+        "edges":{
+            "|":["14"]
+        },
+        "accept":"bit opeater"
+    },
+    "14":{
+        "edges":{
+
+        },
+        "accept":"logical opeater"
+    },
+    "15":{
+        "edges":{
+            "=":["16"]
+        },
+        "accept":"comparision"
+    },
+    "16":{
+        "edges":{
+
+        },
+        "accept":"comparision"
+    },
+    "17":{
+        "edges":{
+            "=":["18"]
+        },
+        "accept":"comparision"
+    },
+    "18":{
+        "edges":{
+
+        },
+        "accept":"comparision"
+    },
+    "19":{
+        "edges":{
+            "=":["20"]
+        },
+        "accept":"bit opeater"
+    },
+    "20":{
+        "edges":{
+
+        },
+        "accept":"comparision"
+    },
+    "21":{
+        "edges":{
+            "=":["22"]
+        },
+        "accept":"assignment"
+    },
+    "22":{
+        "edges":{
+            
+        },
+        "accept":"comparision"
+    }
+}

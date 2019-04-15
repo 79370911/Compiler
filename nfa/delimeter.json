@@ -1,0 +1,56 @@
+{
+    "0":{
+        "edges":{
+            "{":["1"],
+            "}":["2"],
+            "(":["3"],
+            ")":["4"],
+            "[":["5"],
+            "]":["6"],
+            "\"":["7"],
+            "'":["8"],
+            ",":["9"],
+            ";":["10"]
+        }
+    },
+    "1":{
+        "edges":{},
+        "accept":"left curly bracket"
+    },
+    "2":{
+        "edges":{},
+        "accept":"right curly bracket"
+    },
+    "3":{
+        "edges":{},
+        "accept":"left round bracket"
+    },
+    "4":{
+        "edges":{},
+        "accept":"right round bracket"
+    },
+    "5":{
+        "edges":{},
+        "accept":"left square bracket"
+    },
+    "6":{
+        "edges":{},
+        "accept":"right square bracket"
+    },
+    "7":{
+        "edges":{},
+        "accept":"double quote"
+    },
+    "8":{
+        "edges":{},
+        "accept":"quote"
+    },
+    "9":{
+        "edges":{},
+        "accept":"comma"
+    },
+    "10":{
+        "edges":{},
+        "accept":"semicolon"
+    }
+}
