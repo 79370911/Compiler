@@ -2,7 +2,9 @@
 ```
 This repo stores a python script which provide the capability to convert NFA to DFA.
 also it is able to analyze the input code then output the lexical token sequence.
+In short, this is a simple lexer project.
 ```
+
 #### Installation
 ```
 # 1. Install  graphviz
