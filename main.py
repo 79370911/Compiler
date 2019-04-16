@@ -381,7 +381,7 @@ def mergeNFA():
         print("Mergeing: %s" % (filename))
         nfa = importNFA(filename)
         print("-" * 0x10 + " %s " % (filename) + "-" * 0x10)
-        nfa.visualize(prefix.split(".json")[0])
+        # nfa.visualize(prefix.split(".json")[0])
         print(nfa.toJson())
         for node in nfa.nodes:
             node.label = "%s-%s" % (prefix, node.label)
@@ -412,7 +412,7 @@ def main():
     # NFA to DFA
     dfa = DFA(nfa)
     dfa.save("dfa.json")
-    dfa.visualize("dfa")
+    # dfa.visualize("dfa")
 
     # Read code
     code = open("code.c").read()
