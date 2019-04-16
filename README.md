@@ -27,7 +27,7 @@ python main.py
 ```
 
 #### Example
-```
+```c
 ---------------- Code Begins ----------------
 /*
 Multilines comment
