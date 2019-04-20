@@ -9,7 +9,10 @@ class GrammarSymbol:
         return self.symbol
 
     def __eq__(self, other):
-        return self.symbol == other.symbol
+        if isinstance(other, GrammarSymbol):
+            return self.symbol == other.symbol
+        else:
+            return False
 
     def __hash__(self):
         return hash(self.symbol)
@@ -362,6 +365,7 @@ class Grammar:
             "+",
             "ID",
         ]]
+        data.append(Endmark())
         ip = 0
         stack = []
         stack.append(Endmark())
@@ -374,13 +378,13 @@ class Grammar:
         while len(stack) != 1:
             top = stack.pop()
 
-
             if ip < len(data):
                 # there are input left
                 token = data[ip]
                 derivation = self.getDerivation(top, token)
             else:
-                derivation = Epsilon()
+                token = Endmark()
+                derivation = self.getDerivation(top, token)
 
             if top == token:
                 # 1. if (X is a) pop the stack and advance ip
@@ -388,6 +392,7 @@ class Grammar:
             else:
                 if derivation == None:
                     print("No derivation for %s with input %s" % (top, token))
+                    break
                 else:
                     if not isinstance(derivation, Epsilon):
                         for s in derivation.symbols[::-1]:
@@ -395,6 +400,11 @@ class Grammar:
             print("=" * 0x20)
             print("Stack: %s" % ("".join([str(i) for i in stack[::-1]])))
             print("Input: %s" % ("".join([str(i) for i in data[ip:]])))
+
+        if len(stack) == 1 and len(data[ip:]) == 1:
+            print("Parsing succeed")
+        else:
+            print("Parsing failed")
         raise NotImplementedError()
 
     def getDerivation(self, nonterminal, terminal):
