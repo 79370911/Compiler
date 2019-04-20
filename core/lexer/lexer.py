@@ -6,9 +6,7 @@ import queue
 import glob
 import graphviz
 
-from model import Token
-
-tokenSequence = []
+from .model import Token
 
 def reprTuple(T):
     t = list(T)
@@ -250,6 +248,7 @@ class DFA(FA):
         return result
 
     def parse(self, code):
+        tokenSequence = []
         keywords = [
             "auto", "double", "int", "struct", "break", 
             "else", "long", "switch", "case", "enum", 
@@ -261,10 +260,10 @@ class DFA(FA):
         ]
         i = 0
         state = self.init
-        print("-" * 0x10 + " Code Begins " + "-" * 0x10)
-        print(code)
-        print("-" * 0x10 + " Code Ends " + "-" * 0x10)
-        line = 0
+        # print("-" * 0x10 + " Code Begins " + "-" * 0x10)
+        # print(code)
+        # print("-" * 0x10 + " Code Ends " + "-" * 0x10)
+        line = 1
         column = 0
         token = ""
         blank = [" ", "\t", "\n"]
@@ -278,14 +277,19 @@ class DFA(FA):
             ways = self.paths(state, c)
             if len(ways) == 0:
                 if state.accept == None:
-                    print("[%d:%d] %s excepted, got %r" % (line, column, ",".join(["%r" % i.weight for i in self.expectedChars(state)]), c))
+                    pass
+                    # print("[%d:%d] %s excepted, got %r" % (line, column, ",".join(["%r" % i.weight for i in self.expectedChars(state)]), c))
                 else:
-                    print("TOKEN: <%s, %s>" % (state.accept, token))
-                    tokenSequence.append(Token(state.accept, token))
+                    # print("TOKEN: <%s, %s>" % (state.accept, token))
+                    tokenSequence.append(Token(state.accept, token, line, column))
                     state = self.init
                     token = ""
                     while True:
                         if i < (len(code) - 1) and code[i+1] in blank:
+                            column += 1
+                            if code[i+1] == "\n":
+                                line += 1
+                                column = 0
                             i += 1
                         else:
                             break
@@ -299,15 +303,19 @@ class DFA(FA):
                         ways = self.paths(nstate, nextChar)
                         if len(ways) == 0:
                             if token in keywords and nstate.accept == "identifier":
-                                print("TOKEN: <%s, %s>" % ("keywords", token))
-                                tokenSequence.append(Token("keywords", token))
+                                # print("TOKEN: <%s, %s>" % ("keywords", token))
+                                tokenSequence.append(Token("keywords", token, line, column))
                             else:
-                                print("TOKEN: <%s, %s>" % (nstate.accept, token))
-                                tokenSequence.append(Token(nstate.accept, token))
+                                # print("TOKEN: <%s, %s>" % (nstate.accept, token))
+                                tokenSequence.append(Token(nstate.accept, token, line, column))
                             state = self.init
                             token = ""
                             while True:
                                 if i < (len(code) - 1) and code[i+1] in blank:
+                                    column += 1
+                                    if code[i+1] == "\n":
+                                        line += 1
+                                        column = 0
                                     i += 1
                                 else:
                                     break
@@ -316,35 +324,42 @@ class DFA(FA):
                             token += nextChar
                             i += 1
                         else:
-                            print("Wrong DFA")
+                            pass
+                            # print("Wrong DFA")
                     else:
                         if token in keywords and nstate.accept == "identifier":
-                            print("TOKEN: <%s, %s>" % ("keywords", token))
-                            tokenSequence.append(Token("keywords", token))
+                            # print("TOKEN: <%s, %s>" % ("keywords", token))
+                            tokenSequence.append(Token("keywords", token, line, column))
 
                         else:
-                            print("TOKEN: <%s, %s>" % (nstate.accept, token))
-                            tokenSequence.append(Token(nstate.accept, token))
+                            # print("TOKEN: <%s, %s>" % (nstate.accept, token))
+                            tokenSequence.append(Token(nstate.accept, token, line, column))
 
-                        print("TOKEN: <%s, %s>" % (nstate.accept, token))
-                        tokenSequence.append(Token(nstate.accept, token))
+                        # print("TOKEN: <%s, %s>" % (nstate.accept, token))
+                        tokenSequence.append(Token(nstate.accept, token, line, column))
 
                         state = self.init
                         token = ""
                         while True:
                             if i < (len(code) - 1) and code[i+1] in blank:
+                                column += 1
+                                if code[i+1] == "\n":
+                                    line += 1
+                                    column = 0
                                 i += 1
                             else:
                                 break
                 else:
                     state = nstate
             else:
-                print("Wrong DFA")
+                pass
+                # print("Wrong DFA")
             # Update index
             i += 1
             column += 1
             if i >= len(code):
                 break
+        return tokenSequence
 
     def getRenameTable(self):
         renameTable = {}
@@ -391,11 +406,11 @@ def mergeNFA():
     result = NFA([init], [])
     for filename in filenames:
         prefix = filename.split("nfa\\")[-1]
-        print("Mergeing: %s" % (filename))
+        # print("Mergeing: %s" % (filename))
         nfa = importNFA(filename)
-        print("-" * 0x10 + " %s " % (filename) + "-" * 0x10)
+        # print("-" * 0x10 + " %s " % (filename) + "-" * 0x10)
         # nfa.visualize(prefix.split(".json")[0])
-        print(nfa.toJson())
+        # print(nfa.toJson())
         for node in nfa.nodes:
             node.label = "%s-%s" % (prefix, node.label)
             if node.init:
@@ -407,7 +422,7 @@ def mergeNFA():
             result.edges.append(edge)
     with open("nfa.json", "w") as f:
         f.write(result.toJson())
-    print("-" * 0x10 + " %s " % (filename) + "-" * 0x10)
+    # print("-" * 0x10 + " %s " % (filename) + "-" * 0x10)
 
 
 def main():
@@ -428,10 +443,10 @@ def main():
     # dfa.visualize("dfa")
 
     # Read code
-    code = open("../code.c").read()
+    code = open("../../code.c").read()
 
     # Parse code
-    dfa.parse(code)
+    tokenSequence = dfa.parse(code)
 
     for token in tokenSequence:
         print(token)

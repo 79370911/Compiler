@@ -5,8 +5,6 @@ from anytree import Node, RenderTree
 class GrammarSymbol:
     def __init__(self, symbol):
         self.symbol = symbol
-        self.line = 0
-        self.column = 0
 
     def __str__(self):
         return self.symbol
@@ -21,6 +19,11 @@ class GrammarSymbol:
         return hash(self.symbol)
 
 class Terminal(GrammarSymbol):
+    def __init__(self, symbol, line=0, column=0):
+        self.symbol = symbol
+        self.line = line
+        self.column = column
+
     def __str__(self):
         return "%s%s%s" % (Fore.RED, super(Terminal, self).__str__(), Style.RESET_ALL)
 
@@ -379,23 +382,8 @@ class Grammar:
         print(tabulate(table, headers=headers, tablefmt='grid'))
 
     def parse(self, tokens):
-        # data = [Terminal(i) for i in [
-        #     "ID",
-        #     "+",
-        #     "ID",
-        #     "*",
-        #     "ID",
-        #     ")",
-        # ]]
-        data = [Terminal(i) for i in [
-            "+",
-            "ID",
-            "*",
-            "+",
-            "ID",
-        ]]
-        if not isinstance(data[-1], Endmark):
-            data.append(Endmark())
+        if not isinstance(tokens[-1], Endmark):
+            tokens.append(Endmark())
         ip = 0
 
         startSymbol = self.getStartSymbol()
@@ -408,14 +396,14 @@ class Grammar:
 
         print("=" * 0x20)
         print("Stack: %s" % ("".join([str(i) if isinstance(i, Endmark) else str(i[0]) for i in stack[::-1]])))
-        print("Input: %s" % ("".join([str(i) for i in data[ip:]])))
+        print("Input: %s" % ("".join([str(i) for i in tokens[ip:]])))
 
         while len(stack) != 1:
             top, currentNode = stack.pop()
 
-            if ip < len(data):
+            if ip < len(tokens):
                 # there are input left
-                token = data[ip]
+                token = tokens[ip]
                 derivation = self.getDerivation(top, token)
             else:
                 token = Endmark()
@@ -442,9 +430,9 @@ class Grammar:
 
             print("=" * 0x20)
             print("Stack: %s" % ("".join([str(i) if isinstance(i, Endmark) else str(i[0]) for i in stack[::-1]])))
-            print("Input: %s" % ("".join([str(i) for i in data[ip:]])))
+            print("Input: %s" % ("".join([str(i) for i in tokens[ip:]])))
 
-        if len(stack) == 1 and len(data[ip:]) == 1:
+        if len(stack) == 1 and len(tokens[ip:]) == 1:
             print("Parsing succeed")
             for pre, fill, node in RenderTree(root):
                 if isinstance(node.name, Terminal):

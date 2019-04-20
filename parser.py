@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # encoding:utf-8
 
+from core.lexer import model as lmodel
 from core.parser import model as pmodel
 from core.parser import syntax
-from core.lexer import model as lmodel
 import colorama
 
 def main():
@@ -47,13 +47,24 @@ def main():
     grammar.visualizeParsingTable()
     print()
 
-    tokens = [
-        lmodel.Token("program", "123"),
-        lmodel.Token("program", "123"),
-        lmodel.Token("program", "123"),
-        lmodel.Token("program", "123"),
-        lmodel.Token("program", "123"),
-    ]
+    # Error
+    tokens = [pmodel.Terminal(i) for i in [
+        "+",
+        "ID",
+        "*",
+        "+",
+        "ID",
+    ]]
+    # Right
+    tokens = [pmodel.Terminal(i) for i in [
+        "(",
+        "ID",
+        "+",
+        "ID",
+        ")",
+        "*",
+        "ID",
+    ]]
     print(grammar.parse(tokens))
 
 
