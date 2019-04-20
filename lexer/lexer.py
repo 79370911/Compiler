@@ -415,7 +415,7 @@ def main():
     # dfa.visualize("dfa")
 
     # Read code
-    code = open("code.c").read()
+    code = open("../code.c").read()
 
     # Parse code
     dfa.parse(code)
