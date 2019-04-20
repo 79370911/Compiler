@@ -3,7 +3,11 @@
 
 import sys
 import string
-import colors
+
+from colorama import Fore, Back, Style
+from colorama import init
+
+init()
 '''
 Grammar:
 E -> A(E, E)
@@ -32,11 +36,11 @@ class GrammarSymbol:
 
 class Terminal(GrammarSymbol):
     def __str__(self):
-        return "%s%s%s" % (colors.RED, super(Terminal, self).__str__(), colors.RESET)
+        return "%s%s%s" % (Fore.GREEN, super(Terminal, self).__str__(), Style.RESET_ALL)
 
 class NonTerminal(GrammarSymbol):
     def __str__(self):
-        return "%s%s%s" % (colors.BLUE, super(NonTerminal, self).__str__(), colors.RESET)
+        return "%s%s%s" % (Fore.BLUE, super(NonTerminal, self).__str__(), Style.RESET_ALL)
 
 class Derivation:
     def __init__(self, symbols):
