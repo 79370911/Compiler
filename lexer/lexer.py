@@ -6,6 +6,8 @@ import queue
 import glob
 import graphviz
 
+tokenSequence = []
+
 def reprTuple(T):
     t = list(T)
     t.sort()
@@ -34,6 +36,14 @@ def importNFA(filename):
                 edges.append(edge)
     
     return NFA(nodes, edges)
+
+class Token:
+    def __init__(self, description, value):
+        self.description = description
+        self.value = value
+
+    def __str__(self):
+        return "<%s, %s>" % (self.description, self.value)
 
 class Node:
     def __init__(self, label, accept=None, init=False):
@@ -277,6 +287,7 @@ class DFA(FA):
                     print("[%d:%d] %s excepted, got %r" % (line, column, ",".join(["%r" % i.weight for i in self.expectedChars(state)]), c))
                 else:
                     print("TOKEN: <%s, %s>" % (state.accept, token))
+                    tokenSequence.append(Token(state.accept, token))
                     state = self.init
                     token = ""
                     while True:
@@ -295,8 +306,10 @@ class DFA(FA):
                         if len(ways) == 0:
                             if token in keywords and nstate.accept == "identifier":
                                 print("TOKEN: <%s, %s>" % ("keywords", token))
+                                tokenSequence.append(Token("keywords", token))
                             else:
                                 print("TOKEN: <%s, %s>" % (nstate.accept, token))
+                                tokenSequence.append(Token(nstate.accept, token))
                             state = self.init
                             token = ""
                             while True:
@@ -313,9 +326,15 @@ class DFA(FA):
                     else:
                         if token in keywords and nstate.accept == "identifier":
                             print("TOKEN: <%s, %s>" % ("keywords", token))
+                            tokenSequence.append(Token("keywords", token))
+
                         else:
                             print("TOKEN: <%s, %s>" % (nstate.accept, token))
+                            tokenSequence.append(Token(nstate.accept, token))
+
                         print("TOKEN: <%s, %s>" % (nstate.accept, token))
+                        tokenSequence.append(Token(nstate.accept, token))
+
                         state = self.init
                         token = ""
                         while True:
@@ -419,6 +438,9 @@ def main():
 
     # Parse code
     dfa.parse(code)
+
+    for token in tokenSequence:
+        print(token)
 
 if __name__ == "__main__":
     main()
