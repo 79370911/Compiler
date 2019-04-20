@@ -1,4 +1,5 @@
 from colorama import Fore, Back, Style
+from tabulate import tabulate
 
 class GrammarSymbol:
     def __init__(self, symbol):
@@ -282,7 +283,46 @@ class Grammar:
         return self.selectCache[key]
     
     def getParsingTable(self):
-        raise NotImplementedError()
+        terminals = list(self.getTerminals())
+        nonterminals = list(self.getNonTerminals())
+        terminals.sort()
+        nonterminals.sort()
+
+        headers = terminals
+        headers.insert(0, "Non-Terminals")
+        headers.append(Endmark())
+        
+        data = {}
+        for k, v in self.selectCache.items():
+            for value in v:
+                key = (k[0], value)
+                data[key] = k[1]
+
+        M = len(nonterminals)
+        N = len(headers)
+        table = [[None for n in range(N)] for m in range(M)]
+
+        columnMapping = {}
+        i = 0
+        for x in headers:
+            columnMapping[x] = i
+            i += 1
+
+        rowMapping = {}
+        i = 0
+        for x in nonterminals:
+            rowMapping[x] = i
+            i += 1
+
+        for k, v in data.items():
+            x = rowMapping[k[0]]
+            y = columnMapping[k[1]] - 1
+            table[x][0] = k[0]
+            if v:
+                table[x][y + 1] = "%s -> %s" % (k[0], v)
+            else:
+                table[x][y + 1] = None
+        return table, headers
 
     def parse(self, tokens):
         raise NotImplementedError()
@@ -296,7 +336,7 @@ class Grammar:
         keys.sort()
         for k in keys:
             if isinstance(k, NonTerminal):
-                print("%s => %s" % (str(k), ",".join([str(i) for i in d[k]])))
+                print("%s = { %s }" % (str(k), ", ".join([str(i) for i in d[k]])))
                 
     def visualizeFirst(self):
         self.visualizeDict(self.firstCache)
@@ -309,4 +349,8 @@ class Grammar:
             for d in p.body:
                 key = (p.head, d)
                 select = self.getSelect(key)
-                print("%s -> %s => %s" % (p.head, d, ",".join([str(i) for i in select])))
+                print("%s = %s => { %s }" % (p.head, d, ", ".join([str(i) for i in select])))
+
+    def visualizeParsingTable(self):
+        table, headers = self.getParsingTable()
+        print(tabulate(table, headers=headers, tablefmt='grid'))
