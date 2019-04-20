@@ -30,8 +30,6 @@ print(grammar.getStartSymbol())
 print()
 
 print("First set:")
-for s in grammar.getNonTerminals().union(grammar.getTerminals()):
-    grammar.getFirst(s)
 grammar.visualizeFirst()
 print()
 
