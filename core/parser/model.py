@@ -277,8 +277,16 @@ class Grammar:
 
     def getSelect(self, key):
         return self.selectCache[key]
-    
+
     def getParsingTable(self):
+        data = {}
+        for k, v in self.selectCache.items():
+            for value in v:
+                key = (k[0], value)
+                data[key] = k[1]
+        return data
+
+    def getParsingTableForVisualize(self):
         terminals = list(self.getTerminals())
         nonterminals = list(self.getNonTerminals())
         terminals.sort()
@@ -288,11 +296,7 @@ class Grammar:
         headers.insert(0, "Non-Terminals")
         headers.append(Endmark())
         
-        data = {}
-        for k, v in self.selectCache.items():
-            for value in v:
-                key = (k[0], value)
-                data[key] = k[1]
+        data = self.getParsingTable()
 
         M = len(nonterminals)
         N = len(headers)
@@ -303,12 +307,14 @@ class Grammar:
         for x in headers:
             columnMapping[x] = i
             i += 1
+        self.columnMapping = columnMapping
 
         rowMapping = {}
         i = 0
         for x in nonterminals:
             rowMapping[x] = i
             i += 1
+        self.rowMapping = rowMapping
 
         for k, v in data.items():
             x = rowMapping[k[0]]
@@ -319,11 +325,6 @@ class Grammar:
             else:
                 table[x][y + 1] = None
         return table, headers
-
-    def parse(self, tokens):
-        for token in tokens:
-            print(token)
-        raise NotImplementedError()
 
     def visualize(self):
         for p in self.P:
@@ -350,5 +351,55 @@ class Grammar:
                 print("%s = %s => { %s }" % (p.head, d, ", ".join([str(i) for i in select])))
 
     def visualizeParsingTable(self):
-        table, headers = self.getParsingTable()
+        table, headers = self.getParsingTableForVisualize()
         print(tabulate(table, headers=headers, tablefmt='grid'))
+
+    def parse(self, tokens):
+        data = [Terminal(i) for i in [
+            "ID",
+            "+",
+            "ID",
+            "+",
+            "ID",
+        ]]
+        ip = 0
+        stack = []
+        stack.append(Endmark())
+        stack.append(self.getStartSymbol())
+
+        print("=" * 0x20)
+        print("Stack: %s" % ("".join([str(i) for i in stack[::-1]])))
+        print("Input: %s" % ("".join([str(i) for i in data[ip:]])))
+
+        while len(stack) != 1:
+            top = stack.pop()
+
+
+            if ip < len(data):
+                # there are input left
+                token = data[ip]
+                derivation = self.getDerivation(top, token)
+            else:
+                derivation = Epsilon()
+
+            if top == token:
+                # 1. if (X is a) pop the stack and advance ip
+                ip += 1
+            else:
+                if derivation == None:
+                    print("No derivation for %s with input %s" % (top, token))
+                else:
+                    if not isinstance(derivation, Epsilon):
+                        for s in derivation.symbols[::-1]:
+                            stack.append(s)
+            print("=" * 0x20)
+            print("Stack: %s" % ("".join([str(i) for i in stack[::-1]])))
+            print("Input: %s" % ("".join([str(i) for i in data[ip:]])))
+        raise NotImplementedError()
+
+    def getDerivation(self, nonterminal, terminal):
+        table = self.getParsingTable()
+        for k, v in table.items():
+            if k[0] == nonterminal and k[1] == terminal:
+                return v
+        return None
