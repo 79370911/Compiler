@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # encoding:utf-8
 
-import sys
 import string
 
 from colorama import Fore, Back, Style
@@ -36,7 +35,7 @@ class GrammarSymbol:
 
 class Terminal(GrammarSymbol):
     def __str__(self):
-        return "%s%s%s" % (Fore.GREEN, super(Terminal, self).__str__(), Style.RESET_ALL)
+        return "%s%s%s" % (Fore.RED, super(Terminal, self).__str__(), Style.RESET_ALL)
 
 class NonTerminal(GrammarSymbol):
     def __str__(self):
@@ -85,7 +84,7 @@ class Grammar:
         return nonterminals
 
     def getStartSymbol(self):
-        pass
+        return self.P[0].head
 
 productions = [
     # E -> A(E, E) | epsilon
@@ -111,5 +110,4 @@ productions = [
 ]
 
 for i in productions:
-    sys.stdout.write(str(i))
-    print()
+    print(str(i))
