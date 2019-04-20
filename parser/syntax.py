@@ -2,13 +2,13 @@
 # encoding:utf-8
 
 import string
-from model import Production, Derivation, Terminal, NonTerminal
+from model import Production, Derivation, Terminal, NonTerminal, Epsilon
 
 '''
 Grammar:
 E -> A(E, E)
 E -> epsilon
-A -> a|b|...|z
+A -> a | b | ... | z
 
 First(E) = {a, b, ... , z, epsilon}
 First(A) = {a, b, ... , z}
@@ -32,9 +32,7 @@ productions = [
             NonTerminal("E"),
             Terminal(")"),
         ]),
-        Derivation([
-            Terminal("")
-        ]),
+        Epsilon(),
     ]),
     # A -> a | b | ... | z
     Production(NonTerminal("A"), [

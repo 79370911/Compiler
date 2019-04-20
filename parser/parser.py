@@ -23,16 +23,19 @@ print(",".join([str(i) for i in grammar.getNonTerminals()]))
 print("Start Symbol:")
 print(grammar.getStartSymbol())
 
-for n in grammar.getNonTerminals():
+# For all grammar symbols
+# TODO: // Skip epsilon
+for n in grammar.getNonTerminals().union(grammar.getTerminals()):
     print("Analysing NonTerminal(%s): " % (str(n)))
-    print(grammar.getFirst(n))
-    print(grammar.getFollow(n))
-    print(grammar.getSelect(n))
+    grammar.getFirst(n)
+    # print(grammar.getFollow(n))
+    # print(grammar.getSelect(n))
 
-print(grammar.getParsingTable())
+grammar.visualizeFirst()
+# print(grammar.getParsingTable())
 
-tokens = []
-print(grammar.parse(tokens))
+# tokens = []
+# print(grammar.parse(tokens))
 
 # TODO: // Define First class
 # TODO: // Define Follow class
