@@ -1,113 +1,40 @@
 #!/usr/bin/env python
 # encoding:utf-8
 
-import string
+from model import NonTerminal
 
-from colorama import Fore, Back, Style
-from colorama import init
+import colorama
+import model
+import syntax
 
-init()
-'''
-Grammar:
-E -> A(E, E)
-E -> epsilon
-A -> a|b|...|z
+colorama.init()
+grammar = model.Grammar(syntax.productions)
+print("Grammar:")
+grammar.visualize()
 
-First(E) = {a, b, ... , z, epsilon}
-First(A) = {a, b, ... , z}
+print("Production of E:")
+print(grammar.getProduction(NonTerminal("E")))
+print("Production of A:")
+print(grammar.getProduction(NonTerminal("A")))
+print("Terminals:")
+print(",".join([str(i) for i in grammar.getTerminals()]))
+print("NonTerminals:")
+print(",".join([str(i) for i in grammar.getNonTerminals()]))
+print("Start Symbol:")
+print(grammar.getStartSymbol())
 
-Follow(E) = {',', )}
-Follow(A) = {(}
+for n in grammar.getNonTerminals():
+    print("Analysing NonTerminal(%s): " % (str(n)))
+    print(grammar.getFirst(n))
+    print(grammar.getFollow(n))
+    print(grammar.getSelect(n))
 
-Select(E -> A(E, E)) = {a, b, ... , z}
-Select(E -> epsilon) = {',', )}
-Select(A -> a|b|...|z) = {a, b, ... , z}
-'''
+print(grammar.getParsingTable())
 
-class GrammarSymbol:
-    def __init__(self, symbol):
-        self.symbol = symbol
+tokens = []
+print(grammar.parse(tokens))
 
-    def __str__(self):
-        if self.symbol == "":
-            return "epsilon"
-        return self.symbol
-
-class Terminal(GrammarSymbol):
-    def __str__(self):
-        return "%s%s%s" % (Fore.RED, super(Terminal, self).__str__(), Style.RESET_ALL)
-
-class NonTerminal(GrammarSymbol):
-    def __str__(self):
-        return "%s%s%s" % (Fore.BLUE, super(NonTerminal, self).__str__(), Style.RESET_ALL)
-
-class Derivation:
-    def __init__(self, symbols):
-        self.symbols = symbols
-
-    def __str__(self):
-        return "".join([str(i) for i in self.symbols])
-
-class Production:
-    def __init__(self, head, body):
-        self.head = head
-        self.body = body
-
-    def __str__(self):
-        return "%s -> %s" % (self.head, " | ".join([str(i) for i in self.body]))
-
-class Grammar:
-    def __init__(self, P):
-        self.P = P
-        self.T = self.getTerminals()
-        self.N = self.getNonTerminals()
-        self.S = self.getStartSymbol()
-
-    def getProduction(self, head):
-        for p in self.P:
-            if head == p.head:
-                return p
-        return None
-
-    def getTerminals(self):
-        terminals = set()
-        for p in self.P:
-            if isinstance(p, Terminal):
-                terminals.add(p.head)
-        return terminals
-
-    def getNonTerminals(self):
-        nonterminals = set()
-        for p in self.P:
-            if isinstance(p, NonTerminal):
-                nonterminals.add(p.head)
-        return nonterminals
-
-    def getStartSymbol(self):
-        return self.P[0].head
-
-productions = [
-    # E -> A(E, E) | epsilon
-    Production(NonTerminal("E"), [
-        Derivation([
-            NonTerminal("A"),
-            Terminal("("),
-            NonTerminal("E"),
-            Terminal(","),
-            NonTerminal("E"),
-            Terminal(")"),
-        ]),
-        Derivation([
-            Terminal("")
-        ]),
-    ]),
-    # A -> a | b | ... | z
-    Production(NonTerminal("A"), [
-        Derivation([
-            Terminal(i)
-        ]) for i in string.ascii_lowercase
-    ])
-]
-
-for i in productions:
-    print(str(i))
+# TODO: // Define First class
+# TODO: // Define Follow class
+# TODO: // Define Predictive Analysis table class
+# TODO: // Implement visualize method

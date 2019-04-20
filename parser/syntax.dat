@@ -1,7 +1,0 @@
-program -> block
-block -> { decls stmts }
-decls -> decls decl | epsilon
-decl -> type id ;
-type -> type [ num ] | basic
-stmts -> stmts stmt | epsilon
-
