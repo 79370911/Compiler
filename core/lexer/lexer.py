@@ -6,6 +6,8 @@ import queue
 import glob
 import graphviz
 
+from model import Token
+
 tokenSequence = []
 
 def reprTuple(T):
@@ -36,14 +38,6 @@ def importNFA(filename):
                 edges.append(edge)
     
     return NFA(nodes, edges)
-
-class Token:
-    def __init__(self, description, value):
-        self.description = description
-        self.value = value
-
-    def __str__(self):
-        return "<%s, %s>" % (self.description, self.value)
 
 class Node:
     def __init__(self, label, accept=None, init=False):

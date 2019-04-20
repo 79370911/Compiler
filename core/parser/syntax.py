@@ -2,7 +2,7 @@
 # encoding:utf-8
 
 import string
-from model import Production, Derivation, Terminal, NonTerminal, Epsilon
+from .model import Production, Derivation, Terminal, NonTerminal, Epsilon
 
 # '''
 # Grammar:

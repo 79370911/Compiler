@@ -6,10 +6,6 @@ class GrammarSymbol:
         self.symbol = symbol
 
     def __str__(self):
-        # if self.symbol == "":
-        #     # TODO: !!! Notice that epsilon is not a syntax symbol, neither terminal nor non-terminal
-        #     # We should not handle epsilon here
-        #     return "epsilon"
         return self.symbol
 
     def __eq__(self, other):
@@ -325,6 +321,8 @@ class Grammar:
         return table, headers
 
     def parse(self, tokens):
+        for token in tokens:
+            print(token)
         raise NotImplementedError()
 
     def visualize(self):
