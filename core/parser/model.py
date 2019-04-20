@@ -23,7 +23,7 @@ class GrammarSymbol:
 class Terminal(GrammarSymbol):
     def __str__(self):
         return "%s%s%s" % (Fore.RED, super(Terminal, self).__str__(), Style.RESET_ALL)
-    
+
     def __lt__(self, other):
         return self.symbol < other.symbol
 
@@ -380,7 +380,7 @@ class Grammar:
         stack.append((startSymbol, root))
 
         print("=" * 0x20)
-        print("Stack: %s" % ("".join([str(i) for i in stack[::-1]])))
+        print("Stack: %s" % ("".join([str(i[0]) for i in stack[1:][::-1]])))
         print("Input: %s" % ("".join([str(i) for i in data[ip:]])))
 
         while len(stack) != 1:
@@ -411,14 +411,17 @@ class Grammar:
                         Node(Epsilon(), parent=currentNode)
 
             print("=" * 0x20)
-            print("Stack: %s" % ("".join([str(i) for i in stack[::-1]])))
+            print("Stack: %s" % ("".join([str(i[0]) for i in stack[1:][::-1]])))
             print("Input: %s" % ("".join([str(i) for i in data[ip:]])))
 
 
         if len(stack) == 1 and len(data[ip:]) == 1:
             print("Parsing succeed")
             for pre, fill, node in RenderTree(root):
-                print("%s%s" % (pre, node.name))
+                if isinstance(node.name, Terminal):
+                    print("%s%s" % (pre, "[%d:%d] %s" % (node.name.line, node.name.column, node.name)))
+                else:
+                    print("%s%s" % (pre, node.name))
         else:
             print("Parsing failed")
 
