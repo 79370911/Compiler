@@ -53,6 +53,10 @@ class Derivation:
     def __str__(self):
         return "".join([str(i) for i in self.symbols])
 
+class Synch:
+    def __str__(self):
+        return "synch"
+
 class Epsilon():
     def __str__(self):
         return "%s%s%s" % (Fore.MAGENTA, "epsilon", Style.RESET_ALL)
@@ -96,6 +100,7 @@ class Grammar:
         self.firstCache = {}
         self.followCache = {}
         self.selectCache = {}
+        self.parsingTable = None
 
     def getProductionOfNonTerminal(self, head):
         for p in self.P:
@@ -285,12 +290,22 @@ class Grammar:
         return self.selectCache[key]
 
     def getParsingTable(self):
-        data = {}
-        for k, v in self.selectCache.items():
-            for value in v:
-                key = (k[0], value)
-                data[key] = k[1]
-        return data
+        if self.parsingTable == None:
+            data = {}
+            for k, v in self.selectCache.items():
+                for value in v:
+                    key = (k[0], value)
+                    data[key] = k[1]
+            self.parsingTable = data
+        return self.parsingTable
+
+    def getParsingTableWithSynch(self):
+        for x in self.getNonTerminals():
+            follow = self.getFollow(x)
+            print("FOLLOW(%s) = %s" % (x, ",".join([str(_) for _ in follow])))
+            for y in follow:
+                self.setDerivation(x, y, Synch())
+        return self.getParsingTable()
 
     def getParsingTableForVisualize(self):
         terminals = list(self.getTerminals())
@@ -302,7 +317,7 @@ class Grammar:
         headers.insert(0, "Non-Terminals")
         headers.append(Endmark())
         
-        data = self.getParsingTable()
+        data = self.getParsingTableWithSynch()
 
         M = len(nonterminals)
         N = len(headers)
@@ -327,7 +342,10 @@ class Grammar:
             y = columnMapping[k[1]] - 1
             table[x][0] = k[0]
             if v:
-                table[x][y + 1] = "%s -> %s" % (k[0], v)
+                if isinstance(v, Synch):
+                    table[x][y + 1] = v
+                else:
+                    table[x][y + 1] = "%s -> %s" % (k[0], v)
             else:
                 table[x][y + 1] = None
         return table, headers
@@ -361,14 +379,23 @@ class Grammar:
         print(tabulate(table, headers=headers, tablefmt='grid'))
 
     def parse(self, tokens):
+        # data = [Terminal(i) for i in [
+        #     "ID",
+        #     "+",
+        #     "ID",
+        #     "*",
+        #     "ID",
+        #     ")",
+        # ]]
         data = [Terminal(i) for i in [
-            "ID",
             "+",
             "ID",
             "*",
+            "+",
             "ID",
         ]]
-        data.append(Endmark())
+        if not isinstance(data[-1], Endmark):
+            data.append(Endmark())
         ip = 0
 
         startSymbol = self.getStartSymbol()
@@ -380,7 +407,7 @@ class Grammar:
         stack.append((startSymbol, root))
 
         print("=" * 0x20)
-        print("Stack: %s" % ("".join([str(i[0]) for i in stack[1:][::-1]])))
+        print("Stack: %s" % ("".join([str(i) if isinstance(i, Endmark) else str(i[0]) for i in stack[::-1]])))
         print("Input: %s" % ("".join([str(i) for i in data[ip:]])))
 
         while len(stack) != 1:
@@ -395,25 +422,27 @@ class Grammar:
                 derivation = self.getDerivation(top, token)
 
             if top == token:
-                # 1. if (X is a) pop the stack and advance ip
                 ip += 1
             else:
                 if derivation == None:
-                    print("[%d:%d] No derivation for %s with input %s" % (token.line, token.column, top, token))
-                    break
+                    # 1. M[A, a] = None, according to the panic mode, we should ignore the invalid user input.
+                    print("[%d:%d][Ignore] No derivation for %s with input %s" % (token.line, token.column, top, token))
+                    stack.append((top, currentNode))
+                    ip += 1
                 else:
                     print("%s -> %s" % (top, derivation))
-                    if not isinstance(derivation, Epsilon):
+                    if isinstance(derivation, Epsilon):
+                        Node(Epsilon(), parent=currentNode)
+                    elif isinstance(derivation, Synch):
+                        print("[%d:%d][Error] Synch derivation for %s with input %s" % (token.line, token.column, top, token))
+                    else:
                         for s in derivation.symbols[::-1]:
                             node = Node(s, parent=currentNode)
                             stack.append((s, node))
-                    else:
-                        Node(Epsilon(), parent=currentNode)
 
             print("=" * 0x20)
-            print("Stack: %s" % ("".join([str(i[0]) for i in stack[1:][::-1]])))
+            print("Stack: %s" % ("".join([str(i) if isinstance(i, Endmark) else str(i[0]) for i in stack[::-1]])))
             print("Input: %s" % ("".join([str(i) for i in data[ip:]])))
-
 
         if len(stack) == 1 and len(data[ip:]) == 1:
             print("Parsing succeed")
@@ -431,3 +460,9 @@ class Grammar:
             if k[0] == nonterminal and k[1] == terminal:
                 return v
         return None
+    
+    def setDerivation(self, nonterminal, terminal, derivation):
+        table = self.getParsingTable()
+        key = (nonterminal, terminal)
+        if key not in table.keys():
+            table[key] = derivation
