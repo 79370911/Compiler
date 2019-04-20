@@ -4,40 +4,95 @@
 import string
 from model import Production, Derivation, Terminal, NonTerminal, Epsilon
 
+# '''
+# Grammar:
+# E -> A(E, E)
+# E -> epsilon
+# A -> a | b | ... | z
+
+# First(E) = {a, b, ... , z, epsilon}
+# First(A) = {a, b, ... , z}
+
+# Follow(E) = {',', )}
+# Follow(A) = {(}
+
+# Select(E -> A(E, E)) = {a, b, ... , z}
+# Select(E -> epsilon) = {',', )}
+# Select(A -> a|b|...|z) = {a, b, ... , z}
+# '''
+
+# productions = [
+#     # E -> A(E, E) | epsilon
+#     Production(NonTerminal("E"), [
+#         Derivation([
+#             NonTerminal("A"),
+#             Terminal("("),
+#             NonTerminal("E"),
+#             Terminal(","),
+#             NonTerminal("E"),
+#             Terminal(")"),
+#         ]),
+#         Epsilon(),
+#     ]),
+#     # A -> a | b | ... | z
+#     Production(NonTerminal("A"), [
+#         Derivation([
+#             Terminal(i)
+#         ]) for i in string.ascii_lowercase
+#     ])
+# ]
+
+
 '''
-Grammar:
-E -> A(E, E)
-E -> epsilon
-A -> a | b | ... | z
-
-First(E) = {a, b, ... , z, epsilon}
-First(A) = {a, b, ... , z}
-
-Follow(E) = {',', )}
-Follow(A) = {(}
-
-Select(E -> A(E, E)) = {a, b, ... , z}
-Select(E -> epsilon) = {',', )}
-Select(A -> a|b|...|z) = {a, b, ... , z}
+E -> TE'
+E' -> +TE' | epsilon
+T -> FT'
+T' -> *FT' | epsilon
+F -> (E) | id
 '''
 
 productions = [
-    # E -> A(E, E) | epsilon
+    # E -> TE'
     Production(NonTerminal("E"), [
         Derivation([
-            NonTerminal("A"),
-            Terminal("("),
-            NonTerminal("E"),
-            Terminal(","),
-            NonTerminal("E"),
-            Terminal(")"),
+            NonTerminal("T"),
+            NonTerminal("E'"),
+        ]),
+    ]),
+    # E' -> +TE' | epsilon
+    Production(NonTerminal("E'"), [
+        Derivation([
+            Terminal("+"),
+            NonTerminal("T"),
+            NonTerminal("E'"),
         ]),
         Epsilon(),
     ]),
-    # A -> a | b | ... | z
-    Production(NonTerminal("A"), [
+    # T -> FT'
+    Production(NonTerminal("T"), [
         Derivation([
-            Terminal(i)
-        ]) for i in string.ascii_lowercase
-    ])
+            NonTerminal("F"),
+            NonTerminal("T'"),
+        ]),
+    ]),
+    # T' -> *FT' | epsilon
+    Production(NonTerminal("T'"), [
+        Derivation([
+            Terminal("*"),
+            NonTerminal("F"),
+            NonTerminal("T'"),
+        ]),
+        Epsilon(),
+    ]),
+    # F -> (E) | id
+    Production(NonTerminal("F"), [
+        Derivation([
+            Terminal("("),
+            NonTerminal("E"),
+            Terminal(")"),
+        ]),
+        Derivation([
+            Terminal("ID")
+        ]),
+    ]),
 ]
