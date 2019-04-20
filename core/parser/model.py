@@ -1,9 +1,12 @@
 from colorama import Fore, Back, Style
 from tabulate import tabulate
+from anytree import Node, RenderTree
 
 class GrammarSymbol:
     def __init__(self, symbol):
         self.symbol = symbol
+        self.line = 0
+        self.column = 0
 
     def __str__(self):
         return self.symbol
@@ -362,21 +365,26 @@ class Grammar:
             "ID",
             "+",
             "ID",
-            "+",
+            "*",
             "ID",
         ]]
         data.append(Endmark())
         ip = 0
+
+        startSymbol = self.getStartSymbol()
+
         stack = []
         stack.append(Endmark())
-        stack.append(self.getStartSymbol())
+
+        root = Node(startSymbol)
+        stack.append((startSymbol, root))
 
         print("=" * 0x20)
         print("Stack: %s" % ("".join([str(i) for i in stack[::-1]])))
         print("Input: %s" % ("".join([str(i) for i in data[ip:]])))
 
         while len(stack) != 1:
-            top = stack.pop()
+            top, currentNode = stack.pop()
 
             if ip < len(data):
                 # there are input left
@@ -391,21 +399,28 @@ class Grammar:
                 ip += 1
             else:
                 if derivation == None:
-                    print("No derivation for %s with input %s" % (top, token))
+                    print("[%d:%d] No derivation for %s with input %s" % (token.line, token.column, top, token))
                     break
                 else:
+                    print("%s -> %s" % (top, derivation))
                     if not isinstance(derivation, Epsilon):
                         for s in derivation.symbols[::-1]:
-                            stack.append(s)
+                            node = Node(s, parent=currentNode)
+                            stack.append((s, node))
+                    else:
+                        Node(Epsilon(), parent=currentNode)
+
             print("=" * 0x20)
             print("Stack: %s" % ("".join([str(i) for i in stack[::-1]])))
             print("Input: %s" % ("".join([str(i) for i in data[ip:]])))
 
+
         if len(stack) == 1 and len(data[ip:]) == 1:
             print("Parsing succeed")
+            for pre, fill, node in RenderTree(root):
+                print("%s%s" % (pre, node.name))
         else:
             print("Parsing failed")
-        raise NotImplementedError()
 
     def getDerivation(self, nonterminal, terminal):
         table = self.getParsingTable()
