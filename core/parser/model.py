@@ -19,8 +19,9 @@ class GrammarSymbol:
         return hash(self.symbol)
 
 class Terminal(GrammarSymbol):
-    def __init__(self, symbol, line=0, column=0):
+    def __init__(self, symbol, description="UNKNOWN", line=0, column=0):
         self.symbol = symbol
+        self.description = description
         self.line = line
         self.column = column
 
@@ -29,6 +30,22 @@ class Terminal(GrammarSymbol):
 
     def __lt__(self, other):
         return self.symbol < other.symbol
+
+    def __eq__(self, other):
+        if isinstance(other, Terminal):
+            return self.symbol == other.symbol
+        else:
+            return self.symbol == other
+
+    # def __eq__(self, other):
+    #     if isinstance(other, str):
+    #         return self.symbol == other
+    #     else:
+    #         return self.symbol == other.symbol and self.description == other.description
+
+    def __hash__(self):
+        return hash("%s, %s" % (self.symbol, self.description))    
+
 
 class NonTerminal(GrammarSymbol):
     def __str__(self):
@@ -54,7 +71,7 @@ class Derivation:
         self.symbols = symbols
 
     def __str__(self):
-        return "".join([str(i) for i in self.symbols])
+        return " ".join([str(i) for i in self.symbols])
 
 class Synch:
     def __str__(self):
@@ -148,6 +165,10 @@ class Grammar:
     def getStartSymbol(self):
         return self.P[0].head
 
+    def buildFirst(self):
+        for i in self.getNonTerminals():
+            self.getFirst(i)
+
     def getFirst(self, symbol):
         # Cache hit
         if symbol in self.firstCache.keys():
@@ -159,6 +180,7 @@ class Grammar:
         else:
             # Get production
             production = self.getProductionOfNonTerminal(symbol)
+            print("%s => %s" % (symbol, production))
             for d in production.body:
                 # 2. If X -> epsilon is a production(Derivation of a production), then add epsilon to FIRST(X)
                 if isinstance(d, Epsilon):
@@ -395,8 +417,8 @@ class Grammar:
         stack.append((startSymbol, root))
 
         print("=" * 0x20)
-        print("Stack: %s" % ("".join([str(i) if isinstance(i, Endmark) else str(i[0]) for i in stack[::-1]])))
-        print("Input: %s" % ("".join([str(i) for i in tokens[ip:]])))
+        print("Stack: %s" % (",".join([str(i) if isinstance(i, Endmark) else str(i[0]) for i in stack[::-1]])))
+        print("Input: %s" % (",".join([str(i) for i in tokens[ip:]])))
 
         while len(stack) != 1:
             top, currentNode = stack.pop()
@@ -404,19 +426,24 @@ class Grammar:
             if ip < len(tokens):
                 # there are input left
                 token = tokens[ip]
-                derivation = self.getDerivation(top, token)
             else:
                 token = Endmark()
-                derivation = self.getDerivation(top, token)
 
-            if top == token:
+            if (isinstance(top, Terminal) and isinstance(token, Terminal) and top.symbol == token.description):
                 ip += 1
             else:
+                if isinstance(top, NonTerminal) and isinstance(token, Terminal):
+                    derivation = self.getDerivation(top, token.description)
+                else:
+                    derivation = self.getDerivation(top, token)
                 if derivation == None:
                     # 1. M[A, a] = None, according to the panic mode, we should ignore the invalid user input.
-                    print("[%d:%d][Ignore] No derivation for %s with input %s" % (token.line, token.column, top, token))
-                    stack.append((top, currentNode))
-                    ip += 1
+                    if isinstance(token, Endmark):
+                        break
+                    else:
+                        print("[%d:%d][Ignore] No derivation for %s with input %s" % (token.line, token.column, top, token))
+                        stack.append((top, currentNode))
+                        ip += 1
                 else:
                     print("%s -> %s" % (top, derivation))
                     if isinstance(derivation, Epsilon):
@@ -429,8 +456,8 @@ class Grammar:
                             stack.append((s, node))
 
             print("=" * 0x20)
-            print("Stack: %s" % ("".join([str(i) if isinstance(i, Endmark) else str(i[0]) for i in stack[::-1]])))
-            print("Input: %s" % ("".join([str(i) for i in tokens[ip:]])))
+            print("Stack: %s" % (",".join([str(i) if isinstance(i, Endmark) else str(i[0]) for i in stack[::-1]])))
+            print("Input: %s" % (",".join([str(i) for i in tokens[ip:]])))
 
         if len(stack) == 1 and len(tokens[ip:]) == 1:
             print("Parsing succeed")
