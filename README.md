@@ -16,11 +16,6 @@ The output consists of:
 In short, this is a simple lexer-parser project.
 ```
 
-#### Usage
-```
-python parser.py
-```
-
 #### TODO
 - [x] Lexer (Lab1)
 - [x] Parser (Lab2)

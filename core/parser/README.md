@@ -1,6 +1,11 @@
 # Parser
 
 
+#### Usage
+```
+python parser.py
+```
+
 #### Data Structure Defination
 1. Syntax
 ```python
