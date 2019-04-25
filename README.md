@@ -16,7 +16,14 @@ The output consists of:
 In short, this is a simple lexer-parser project.
 ```
 
+#### Report
+
+[编译原理实验报告-词法分析](core/lexer/doc/编译原理实验报告-语法分析.doc)
+
+[编译原理实验报告-语法分析](core/parser/doc/编译原理实验报告-语法分析.doc)
+
 #### TODO
+
 - [x] Lexer (Lab1)
 - [x] Parser (Lab2)
 - [ ] Intermediate Code Generation (Lab3)
