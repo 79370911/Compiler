@@ -18,9 +18,9 @@ In short, this is a simple lexer-parser project.
 
 #### Report
 
-[编译原理实验报告-词法分析](core/lexer/doc/编译原理实验报告-语法分析.doc)
+[编译原理实验报告-词法分析](core/lexer/doc/编译原理实验报告-词法分析.docx)
 
-[编译原理实验报告-语法分析](core/parser/doc/编译原理实验报告-语法分析.doc)
+[编译原理实验报告-语法分析](core/parser/doc/编译原理实验报告-语法分析.docx)
 
 #### TODO
 
